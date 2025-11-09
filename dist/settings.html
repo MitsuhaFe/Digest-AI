@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digest AI - 设置</title>
+  <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <div class="logo">
+        <h1>📚 Digest AI</h1>
+        <p class="version">v0.1.0</p>
+      </div>
+      
+      <nav class="nav-menu">
+        <a href="#general" class="nav-item active" data-section="general">
+          <span class="icon">⚙️</span>
+          <span>基本设置</span>
+        </a>
+        <a href="#ai" class="nav-item" data-section="ai">
+          <span class="icon">🤖</span>
+          <span>AI 模型配置</span>
+        </a>
+        <a href="#about" class="nav-item" data-section="about">
+          <span class="icon">ℹ️</span>
+          <span>关于</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button id="backToDashboard" class="btn-link">返回阅读库</button>
+      </div>
+    </aside>
+    
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <!-- 基本设置 -->
+      <section id="general-section" class="settings-section active">
+        <h2 class="section-title">基本设置</h2>
+        
+        <div class="setting-group">
+          <label class="setting-label">主题</label>
+          <select id="themeSelect" class="input-field">
+            <option value="light">浅色</option>
+            <option value="dark">深色</option>
+            <option value="auto">跟随系统</option>
+          </select>
+          <p class="setting-hint">选择您偏好的界面主题</p>
+        </div>
+        
+         <div class="setting-group">
+          <label class="setting-label">字体大小</label>
+          <select id="fontSizeSelect" class="input-field">
+            <option value="small">小</option>
+            <option value="medium">中</option>
+            <option value="large">大</option>
+          </select>
+          <p class="setting-hint">调整阅读库中的文字大小</p>
+        </div>
+        
+        <div class="setting-group">
+          <button id="saveBasicSettingsBtn" class="btn btn-primary">
+            💾 保存基本设置
+          </button>
+        </div>
+      </section>
+      
+      <!-- AI 模型配置 -->
+      <section id="ai-section" class="settings-section">
+        <h2 class="section-title">AI 模型配置</h2>
+        
+        <div class="info-box">
+          <p>💡 <strong>提示：</strong>您需要自己的 API Key 才能使用 AI 功能。所有 API Key 都安全地存储在本地，不会上传到任何服务器。</p>
+        </div>
+        
+        <div class="setting-group">
+          <label class="setting-label">选择 AI 模型</label>
+          <select id="aiModelSelect" class="input-field">
+            <option value="">请选择...</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="openai">OpenAI (GPT)</option>
+            <option value="claude">Anthropic Claude</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="qwen">通义千问</option>
+          </select>
+          <p class="setting-hint">选择您要使用的 AI 模型</p>
+        </div>
+        
+        <!-- API Key 配置区域 - 为每个模型单独显示 -->
+        <div class="setting-group">
+          <h3 class="subsection-title">🔑 API Key 配置</h3>
+          <p class="setting-hint" style="margin-bottom: 16px; color: #666;">💡 为每个模型配置独立的 API Key，切换模型时自动使用对应的 Key</p>
+          
+          <!-- Gemini API Key -->
+          <div class="setting-item">
+            <label class="setting-label">Google Gemini API Key</label>
+            <div class="input-with-button">
+              <input 
+                type="password" 
+                id="geminiApiKeyInput" 
+                class="input-field" 
+                placeholder="粘贴您的 Gemini API Key"
+                autocomplete="off"
+              />
+              <button class="btn-icon toggle-api-key" data-target="geminiApiKeyInput" title="显示/隐藏">👁️</button>
+            </div>
+            <p class="setting-hint">
+              获取地址：<a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a> 
+              （免费额度充足 ⭐ 推荐）
+            </p>
+          </div>
+          
+          <!-- OpenAI API Key -->
+          <div class="setting-item">
+            <label class="setting-label">OpenAI API Key</label>
+            <div class="input-with-button">
+              <input 
+                type="password" 
+                id="openaiApiKeyInput" 
+                class="input-field" 
+                placeholder="粘贴您的 OpenAI API Key (sk-...)"
+                autocomplete="off"
+              />
+              <button class="btn-icon toggle-api-key" data-target="openaiApiKeyInput" title="显示/隐藏">👁️</button>
+            </div>
+            <p class="setting-hint">
+              获取地址：<a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a> 
+              （需要付费）
+            </p>
+          </div>
+          
+          <!-- Claude API Key -->
+          <div class="setting-item">
+            <label class="setting-label">Anthropic Claude API Key</label>
+            <div class="input-with-button">
+              <input 
+                type="password" 
+                id="claudeApiKeyInput" 
+                class="input-field" 
+                placeholder="粘贴您的 Claude API Key"
+                autocomplete="off"
+              />
+              <button class="btn-icon toggle-api-key" data-target="claudeApiKeyInput" title="显示/隐藏">👁️</button>
+            </div>
+            <p class="setting-hint">
+              获取地址：<a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a> 
+              （质量高）
+            </p>
+          </div>
+          
+          <!-- DeepSeek API Key -->
+          <div class="setting-item">
+            <label class="setting-label">DeepSeek API Key</label>
+            <div class="input-with-button">
+              <input 
+                type="password" 
+                id="deepseekApiKeyInput" 
+                class="input-field" 
+                placeholder="粘贴您的 DeepSeek API Key"
+                autocomplete="off"
+              />
+              <button class="btn-icon toggle-api-key" data-target="deepseekApiKeyInput" title="显示/隐藏">👁️</button>
+            </div>
+            <p class="setting-hint">
+              获取地址：<a href="https://platform.deepseek.com" target="_blank">DeepSeek Platform</a> 
+              （性价比高）
+            </p>
+          </div>
+          
+          <!-- Qwen API Key -->
+          <div class="setting-item">
+            <label class="setting-label">通义千问 API Key</label>
+            <div class="input-with-button">
+              <input 
+                type="password" 
+                id="qwenApiKeyInput" 
+                class="input-field" 
+                placeholder="粘贴您的通义千问 API Key"
+                autocomplete="off"
+              />
+              <button class="btn-icon toggle-api-key" data-target="qwenApiKeyInput" title="显示/隐藏">👁️</button>
+            </div>
+            <p class="setting-hint">
+              获取地址：<a href="https://dashscope.console.aliyun.com/" target="_blank">阿里云灵积平台</a> 
+              （国内访问快）
+            </p>
+          </div>
+        </div>
+        
+        <!-- 内容保存设置 -->
+        <div class="setting-group">
+          <h3 class="subsection-title">📦 内容保存默认设置</h3>
+          <p class="setting-hint" style="margin-bottom: 16px; color: #666;">💡 这些是保存文章时的默认选项，您可以在每次保存时在弹窗中灵活调整</p>
+          
+          <!-- 保存原文选项 -->
+          <div class="setting-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="saveOriginalContentCheckbox" checked />
+              默认保存文章原文
+            </label>
+            <p class="setting-hint">关闭后默认只保存 AI 摘要和关键观点（大幅减小存储空间）</p>
+          </div>
+          
+          <!-- 保存图片选项 -->
+          <div class="setting-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="saveImagesCheckbox" checked />
+              默认保存文章图片
+            </label>
+            <p class="setting-hint">关闭后默认移除所有图片，仅保留文字内容</p>
+          </div>
+          
+          <!-- 启用悬浮球 -->
+          <div class="setting-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="enableFloatButtonCheckbox" checked />
+              启用页面悬浮球快捷按钮
+            </label>
+            <p class="setting-hint">在浏览网页时显示一个悬浮按钮，点击即可快速保存当前文章（可拖动位置）</p>
+          </div>
+        </div>
+        
+        <!-- AI 高级设置 -->
+        <div class="setting-group">
+          <h3 class="subsection-title">⚙️ AI 高级设置</h3>
+          
+          <!-- 摘要字数范围 -->
+          <div class="setting-item">
+            <label class="setting-label">摘要字数范围</label>
+            <div class="range-slider-container">
+              <input 
+                type="range" 
+                id="summaryLengthRange" 
+                class="range-slider" 
+                min="50" 
+                max="500" 
+                step="50" 
+                value="200"
+              />
+              <div class="range-value-display">
+                <span id="summaryLengthValue">200</span> 字
+              </div>
+            </div>
+            <p class="setting-hint">调整 AI 生成的摘要长度（50-500字）</p>
+          </div>
+          
+          <!-- AI标签数量 -->
+          <div class="setting-item">
+            <label class="setting-label">AI 推荐标签数量</label>
+            <select id="tagCountSelect" class="input-field">
+              <option value="2">2 个标签</option>
+              <option value="3" selected>3 个标签</option>
+              <option value="4">4 个标签</option>
+              <option value="5">5 个标签</option>
+            </select>
+            <p class="setting-hint">AI 为每篇文章自动推荐的标签数量</p>
+          </div>
+          
+          <!-- 启用AI标签推荐 -->
+          <div class="setting-item">
+            <label class="setting-label checkbox-label">
+              <input type="checkbox" id="enableAutoTagsCheckbox" checked>
+              <span>启用 AI 智能标签推荐</span>
+            </label>
+            <p class="setting-hint">保存文章时自动生成相关标签建议</p>
+          </div>
+        </div>
+        
+        <!-- 自定义提示词 -->
+        <div class="setting-group">
+          <h3 class="subsection-title">✍️ 自定义提示词</h3>
+          
+          <div class="setting-item">
+            <label class="setting-label checkbox-label">
+              <input type="checkbox" id="enableCustomPromptCheckbox">
+              <span>使用自定义提示词（高级用户）</span>
+            </label>
+            <p class="setting-hint">启用后可自定义发送给 AI 的提示词模板</p>
+          </div>
+          
+          <div id="customPromptSection" class="setting-item hidden">
+            <label class="setting-label">自定义提示词模板</label>
+            <textarea 
+              id="customPromptInput" 
+              class="textarea-field" 
+              rows="8"
+              placeholder="请输入您的自定义提示词...
+
+可用变量：
+{{TEXT}} - 文章内容
+{{SUMMARY_LENGTH}} - 摘要字数
+{{TAG_COUNT}} - 标签数量
+
+示例：
+请分析以下文章，生成一个 {{SUMMARY_LENGTH}} 字左右的中文摘要和 {{TAG_COUNT}} 个相关标签。
+
+文章内容：
+{{TEXT}}"
+            ></textarea>
+            <p class="setting-hint">💡 提示：使用 {{TEXT}}、{{SUMMARY_LENGTH}}、{{TAG_COUNT}} 作为变量占位符</p>
+            <button id="resetPromptBtn" class="btn btn-link">恢复默认提示词</button>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button id="saveSettingsBtn" class="btn btn-primary">保存设置</button>
+          <button id="testConnectionBtn" class="btn btn-secondary" disabled>测试连接</button>
+        </div>
+        
+        <div id="statusMessage" class="status-message hidden"></div>
+      </section>
+      
+      <!-- 关于 -->
+      <section id="about-section" class="settings-section">
+        <h2 class="section-title">关于 Digest AI</h2>
+        
+        <div class="about-content">
+          <div class="about-logo">📚</div>
+          <h3>Digest AI</h3>
+          <p class="version-info">版本 0.1.0 (MVP)</p>
+          
+          <p class="about-description">
+            Digest AI 是一款 Chrome 浏览器扩展程序，利用 AI 技术帮助用户快速消化和管理他们的"稍后阅读"列表。
+          </p>
+          
+          <div class="feature-list">
+            <h4>核心功能</h4>
+            <ul>
+              <li>✅ 一键保存文章并生成 AI 摘要</li>
+              <li>✅ 支持多种 AI 模型（Gemini、OpenAI、DeepSeek）</li>
+              <li>✅ 智能提取文章核心观点</li>
+              <li>✅ 强大的本地存储和搜索功能</li>
+              <li>✅ 标签管理系统</li>
+            </ul>
+          </div>
+          
+          <div class="links">
+            <a href="#" class="link-item" id="viewDocs">📖 查看文档</a>
+            <a href="#" class="link-item" id="reportIssue">🐛 反馈问题</a>
+            <a href="#" class="link-item" id="visitGithub">💻 GitHub</a>
+          </div>
+          
+          <p class="copyright">
+            © 2025 Digest AI. MIT License.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <script src="scripts/theme.js"></script>
+  <script src="scripts/fontSize.js"></script>
+  <script>
+    // 页面加载时应用保存的主题和字体大小
+    (async function() {
+      await loadSavedTheme();
+      await loadSavedFontSize();
+      watchSystemTheme();
+    })();
+  </script>
+  <script src="settings.js"></script>
+</body>
+</html>
+

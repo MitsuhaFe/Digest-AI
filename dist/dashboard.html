@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digest AI - 阅读库</title>
+  <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- 左侧文章列表 -->
+    <aside class="article-list-panel">
+      <!-- 头部 -->
+      <header class="panel-header">
+        <h1 class="app-title">📚 Digest AI</h1>
+        <div class="header-actions">
+          <button id="themeToggleBtn" class="icon-btn" title="切换主题">🌓</button>
+          <button id="settingsBtn" class="icon-btn" title="设置">⚙️</button>
+        </div>
+      </header>
+      
+      <!-- 搜索和筛选 -->
+      <div class="search-section">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="搜索文章..." 
+            class="search-input"
+          />
+        </div>
+        
+        <!-- 标签筛选 -->
+        <div class="filter-section">
+          <select id="tagFilter" class="filter-select">
+            <option value="">所有标签</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- 文章列表 -->
+      <div class="articles-list" id="articlesList">
+        <!-- 动态填充 -->
+      </div>
+      
+      <!-- 空状态 -->
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">📭</div>
+        <p class="empty-text">还没有保存任何文章</p>
+        <p class="empty-hint">点击浏览器工具栏的 Digest AI 图标开始保存文章</p>
+      </div>
+    </aside>
+    
+    <!-- 右侧内容展示 -->
+    <main class="content-panel">
+      <!-- 欢迎页 -->
+      <div id="welcomeView" class="content-view">
+        <div class="welcome-content">
+          <div class="welcome-icon">👋</div>
+          <h2>欢迎使用 Digest AI</h2>
+          <p>从左侧选择一篇文章开始阅读</p>
+        </div>
+      </div>
+      
+      <!-- 文章详情 -->
+      <div id="articleView" class="content-view hidden">
+        <!-- 操作栏 -->
+        <div class="article-toolbar">
+          <div class="article-meta">
+            <span id="articleSource" class="article-source"></span>
+            <span class="meta-divider">•</span>
+            <span id="articleDate" class="article-date"></span>
+          </div>
+          
+          <div class="article-actions">
+            <button id="openOriginalBtn" class="action-btn" title="打开原文">
+              🔗 打开原文
+            </button>
+            <button id="exportMarkdownBtn" class="action-btn" title="导出为 Markdown">
+              📄 导出
+            </button>
+            <button id="deleteArticleBtn" class="action-btn danger" title="删除文章">
+              🗑️ 删除
+            </button>
+          </div>
+        </div>
+        
+        <!-- 文章标题 -->
+        <h1 id="articleTitle" class="article-title"></h1>
+        
+        <!-- 标签 -->
+        <div class="article-tags">
+          <div id="articleTagsList" class="tags-list"></div>
+          <button id="addTagBtn" class="add-tag-btn">+ 添加标签</button>
+        </div>
+        
+        <!-- 三段式内容 -->
+        <div class="article-content">
+          <!-- 1. AI 分析 -->
+          <section class="content-section ai-section">
+            <h2 class="section-title">
+              <span class="section-icon">🤖</span>
+              AI 摘要与核心观点
+            </h2>
+            
+            <div class="ai-summary">
+              <h3 class="subsection-title">📝 摘要</h3>
+              <p id="articleSummary" class="summary-text"></p>
+            </div>
+            
+            <div class="ai-keypoints">
+              <h3 class="subsection-title">💡 核心观点</h3>
+              <ul id="articleKeyPoints" class="keypoints-list"></ul>
+            </div>
+          </section>
+          
+          <!-- 2. 原文内容 -->
+          <section class="content-section article-section">
+            <h2 class="section-title">
+              <span class="section-icon">📄</span>
+              原文内容
+            </h2>
+            
+            <div id="articleBody" class="article-body"></div>
+          </section>
+          
+          <!-- 3. 元数据 -->
+          <section class="content-section metadata-section">
+            <h2 class="section-title">
+              <span class="section-icon">ℹ️</span>
+              文章信息
+            </h2>
+            
+            <div class="metadata-grid">
+              <div class="metadata-item">
+                <span class="metadata-label">来源</span>
+                <span id="metaSource" class="metadata-value"></span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">保存时间</span>
+                <span id="metaDate" class="metadata-value"></span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">原文链接</span>
+                <a id="metaUrl" href="#" target="_blank" class="metadata-link"></a>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">字数</span>
+                <span id="metaLength" class="metadata-value"></span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 添加标签模态框 -->
+  <div id="tagModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>添加标签</h3>
+      <input 
+        type="text" 
+        id="newTagInput" 
+        placeholder="输入标签名称" 
+        class="modal-input"
+      />
+      <div class="modal-actions">
+        <button id="cancelTagBtn" class="btn btn-secondary">取消</button>
+        <button id="confirmTagBtn" class="btn btn-primary">添加</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="scripts/theme.js"></script>
+  <script src="scripts/fontSize.js"></script>
+  <script src="scripts/notification.js"></script>
+  <script src="scripts/highlight.js"></script>
+  <script src="dashboard.js"></script>
+  <script>
+    // 页面加载时应用保存的主题和字体大小
+    (async function() {
+      await loadSavedTheme();
+      await loadSavedFontSize();
+      watchSystemTheme();
+    })();
+  </script>
+</body>
+</html>
+
