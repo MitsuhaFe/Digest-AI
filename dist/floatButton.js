@@ -1,1 +1,477 @@
-(()=>{const t=new class{constructor(){this.button=null,this.isDragging=!1,this.startX=0,this.startY=0,this.offsetX=0,this.offsetY=0,this.enabled=!0}async init(){const t=await chrome.storage.local.get(["enableFloatButton"]);this.enabled=void 0===t.enableFloatButton||t.enableFloatButton,this.enabled?(this.remove(),this.button=document.createElement("div"),this.button.id="digest-ai-float-button",this.button.innerHTML='\n      <div class="float-btn-icon">📚</div>\n      <div class="float-btn-tooltip">保存文章</div>\n    ',this.injectStyles(),document.body.appendChild(this.button),this.bindEvents(),await this.loadPosition()):this.remove()}injectStyles(){if(document.getElementById("digest-ai-float-styles"))return;const t=document.createElement("style");t.id="digest-ai-float-styles",t.textContent="\n      #digest-ai-float-button {\n        position: fixed;\n        right: 20px;\n        bottom: 100px;\n        width: 56px;\n        height: 56px;\n        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n        border-radius: 50%;\n        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);\n        cursor: pointer;\n        z-index: 999999;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        user-select: none;\n      }\n      \n      #digest-ai-float-button:hover {\n        transform: scale(1.1);\n        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);\n      }\n      \n      #digest-ai-float-button:active {\n        transform: scale(0.95);\n      }\n      \n      #digest-ai-float-button.dragging {\n        cursor: grabbing;\n        opacity: 0.8;\n      }\n      \n      .float-btn-icon {\n        font-size: 24px;\n        line-height: 1;\n      }\n      \n      .float-btn-tooltip {\n        position: absolute;\n        right: 70px;\n        background: rgba(0, 0, 0, 0.8);\n        color: white;\n        padding: 6px 12px;\n        border-radius: 6px;\n        font-size: 13px;\n        white-space: nowrap;\n        opacity: 0;\n        pointer-events: none;\n        transition: opacity 0.2s;\n      }\n      \n      #digest-ai-float-button:hover .float-btn-tooltip {\n        opacity: 1;\n      }\n      \n      .float-btn-tooltip::after {\n        content: '';\n        position: absolute;\n        right: -6px;\n        top: 50%;\n        transform: translateY(-50%);\n        border: 6px solid transparent;\n        border-left-color: rgba(0, 0, 0, 0.8);\n      }\n      \n      #digest-ai-float-button.saving {\n        animation: pulse 1s ease-in-out infinite;\n      }\n      \n      @keyframes pulse {\n        0%, 100% {\n          transform: scale(1);\n        }\n        50% {\n          transform: scale(1.05);\n        }\n      }\n    ",document.head.appendChild(t)}bindEvents(){this.button&&(this.button.addEventListener("mousedown",this.handleMouseDown.bind(this)),document.addEventListener("mousemove",this.handleMouseMove.bind(this)),document.addEventListener("mouseup",this.handleMouseUp.bind(this)),this.button.addEventListener("touchstart",this.handleTouchStart.bind(this),{passive:!1}),document.addEventListener("touchmove",this.handleTouchMove.bind(this),{passive:!1}),document.addEventListener("touchend",this.handleTouchEnd.bind(this)))}handleMouseDown(t){if(0!==t.button)return;this.isDragging=!0,this.button.classList.add("dragging");const n=this.button.getBoundingClientRect();this.offsetX=t.clientX-n.left,this.offsetY=t.clientY-n.top,this.startX=t.clientX,this.startY=t.clientY,t.preventDefault()}handleMouseMove(t){if(!this.isDragging)return;const n=t.clientX-this.offsetX,e=t.clientY-this.offsetY;this.updatePosition(n,e),t.preventDefault()}handleMouseUp(t){this.isDragging&&(this.isDragging=!1,this.button.classList.remove("dragging"),Math.sqrt(Math.pow(t.clientX-this.startX,2)+Math.pow(t.clientY-this.startY,2))<5?this.handleClick():this.savePosition())}handleTouchStart(t){if(1!==t.touches.length)return;this.isDragging=!0,this.button.classList.add("dragging");const n=t.touches[0],e=this.button.getBoundingClientRect();this.offsetX=n.clientX-e.left,this.offsetY=n.clientY-e.top,this.startX=n.clientX,this.startY=n.clientY,t.preventDefault()}handleTouchMove(t){if(!this.isDragging||1!==t.touches.length)return;const n=t.touches[0],e=n.clientX-this.offsetX,i=n.clientY-this.offsetY;this.updatePosition(e,i),t.preventDefault()}handleTouchEnd(t){if(!this.isDragging)return;this.isDragging=!1,this.button.classList.remove("dragging");const n=t.changedTouches[0];Math.sqrt(Math.pow(n.clientX-this.startX,2)+Math.pow(n.clientY-this.startY,2))<5?this.handleClick():this.savePosition()}updatePosition(t,n){if(!this.button)return;const e=window.innerWidth-this.button.offsetWidth,i=window.innerHeight-this.button.offsetHeight;t=Math.max(0,Math.min(t,e)),n=Math.max(0,Math.min(n,i)),this.button.style.left=`${t}px`,this.button.style.top=`${n}px`,this.button.style.right="auto",this.button.style.bottom="auto"}async handleClick(){if(this.button){this.button.classList.add("saving");try{const t=await chrome.runtime.sendMessage({action:"saveArticle",url:window.location.href,title:document.title});if(!t.success)throw new Error(t.error||"保存失败");this.showToast("✅ 文章已保存","success")}catch(t){console.error("保存文章失败:",t),this.showToast("❌ "+t.message,"error")}finally{this.button.classList.remove("saving")}}}showToast(t,n="info"){const e=document.getElementById("digest-ai-toast");e&&e.remove();const i=document.createElement("div");if(i.id="digest-ai-toast",i.textContent=t,i.className=`digest-ai-toast ${n}`,!document.getElementById("digest-ai-toast-styles")){const t=document.createElement("style");t.id="digest-ai-toast-styles",t.textContent="\n        .digest-ai-toast {\n          position: fixed;\n          top: 20px;\n          left: 50%;\n          transform: translateX(-50%);\n          background: rgba(0, 0, 0, 0.9);\n          color: white;\n          padding: 12px 24px;\n          border-radius: 8px;\n          font-size: 14px;\n          z-index: 1000000;\n          animation: slideDown 0.3s ease-out;\n        }\n        \n        .digest-ai-toast.success {\n          background: linear-gradient(135deg, #10b981 0%, #059669 100%);\n        }\n        \n        .digest-ai-toast.error {\n          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);\n        }\n        \n        @keyframes slideDown {\n          from {\n            opacity: 0;\n            transform: translateX(-50%) translateY(-20px);\n          }\n          to {\n            opacity: 1;\n            transform: translateX(-50%) translateY(0);\n          }\n        }\n      ",document.head.appendChild(t)}document.body.appendChild(i),setTimeout(()=>{i.style.animation="slideDown 0.3s ease-out reverse",setTimeout(()=>i.remove(),300)},3e3)}async savePosition(){if(!this.button)return;const t={left:this.button.style.left,top:this.button.style.top};await chrome.storage.local.set({floatButtonPosition:t})}async loadPosition(){if(!this.button)return;const{floatButtonPosition:t}=await chrome.storage.local.get(["floatButtonPosition"]);t&&t.left&&t.top&&(this.button.style.left=t.left,this.button.style.top=t.top,this.button.style.right="auto",this.button.style.bottom="auto")}remove(){this.button&&(this.button.remove(),this.button=null)}async updateState(){const t=await chrome.storage.local.get(["enableFloatButton"]),n=void 0===t.enableFloatButton||t.enableFloatButton;n!==this.enabled&&(this.enabled=n,n?await this.init():this.remove())}};"loading"===document.readyState?document.addEventListener("DOMContentLoaded",()=>t.init()):t.init(),chrome.storage.onChanged.addListener((n,e)=>{"local"===e&&n.enableFloatButton&&t.updateState()}),"undefined"!=typeof window&&(window.digestAIFloatButton=t)})();
+/******/ (() => { // webpackBootstrap
+/*!********************************!*\
+  !*** ./scripts/floatButton.js ***!
+  \********************************/
+/**
+ * 悬浮按钮功能
+ * 在页面上显示一个可拖动的悬浮球，点击快速保存文章
+ */
+
+class FloatButton {
+  constructor() {
+    this.button = null;
+    this.isDragging = false;
+    this.startX = 0;
+    this.startY = 0;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.enabled = true;
+  }
+
+  /**
+   * 初始化悬浮球
+   */
+  async init() {
+    // 检查是否启用悬浮球
+    const settings = await chrome.storage.local.get(['enableFloatButton']);
+    this.enabled = settings.enableFloatButton !== undefined ? settings.enableFloatButton : true;
+    
+    if (!this.enabled) {
+      this.remove();
+      return;
+    }
+    
+    // 如果已存在，先移除
+    this.remove();
+    
+    // 创建悬浮球
+    this.button = document.createElement('div');
+    this.button.id = 'digest-ai-float-button';
+    this.button.innerHTML = `
+      <div class="float-btn-icon">📚</div>
+      <div class="float-btn-tooltip">保存文章</div>
+    `;
+    
+    // 添加样式
+    this.injectStyles();
+    
+    // 添加到页面
+    document.body.appendChild(this.button);
+    
+    // 绑定事件
+    this.bindEvents();
+    
+    // 从存储加载位置
+    await this.loadPosition();
+  }
+
+  /**
+   * 注入样式
+   */
+  injectStyles() {
+    if (document.getElementById('digest-ai-float-styles')) {
+      return;
+    }
+    
+    const style = document.createElement('style');
+    style.id = 'digest-ai-float-styles';
+    style.textContent = `
+      #digest-ai-float-button {
+        position: fixed;
+        right: 20px;
+        bottom: 100px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+      }
+      
+      #digest-ai-float-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      }
+      
+      #digest-ai-float-button:active {
+        transform: scale(0.95);
+      }
+      
+      #digest-ai-float-button.dragging {
+        cursor: grabbing;
+        opacity: 0.8;
+      }
+      
+      .float-btn-icon {
+        font-size: 24px;
+        line-height: 1;
+      }
+      
+      .float-btn-tooltip {
+        position: absolute;
+        right: 70px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      
+      #digest-ai-float-button:hover .float-btn-tooltip {
+        opacity: 1;
+      }
+      
+      .float-btn-tooltip::after {
+        content: '';
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 6px solid transparent;
+        border-left-color: rgba(0, 0, 0, 0.8);
+      }
+      
+      #digest-ai-float-button.saving {
+        animation: pulse 1s ease-in-out infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+    `;
+    
+    document.head.appendChild(style);
+  }
+
+  /**
+   * 绑定事件
+   */
+  bindEvents() {
+    if (!this.button) return;
+    
+    // 鼠标事件
+    this.button.addEventListener('mousedown', this.handleMouseDown.bind(this));
+    document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+    
+    // 触摸事件（移动端）
+    this.button.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+    document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+    document.addEventListener('touchend', this.handleTouchEnd.bind(this));
+  }
+
+  /**
+   * 鼠标按下
+   */
+  handleMouseDown(e) {
+    if (e.button !== 0) return; // 只处理左键
+    
+    this.isDragging = true;
+    this.button.classList.add('dragging');
+    
+    const rect = this.button.getBoundingClientRect();
+    this.offsetX = e.clientX - rect.left;
+    this.offsetY = e.clientY - rect.top;
+    this.startX = e.clientX;
+    this.startY = e.clientY;
+    
+    e.preventDefault();
+  }
+
+  /**
+   * 鼠标移动
+   */
+  handleMouseMove(e) {
+    if (!this.isDragging) return;
+    
+    const x = e.clientX - this.offsetX;
+    const y = e.clientY - this.offsetY;
+    
+    this.updatePosition(x, y);
+    e.preventDefault();
+  }
+
+  /**
+   * 鼠标释放
+   */
+  handleMouseUp(e) {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    this.button.classList.remove('dragging');
+    
+    // 判断是否为点击（移动距离小于5px）
+    const moveDistance = Math.sqrt(
+      Math.pow(e.clientX - this.startX, 2) + 
+      Math.pow(e.clientY - this.startY, 2)
+    );
+    
+    if (moveDistance < 5) {
+      // 触发点击事件
+      this.handleClick();
+    } else {
+      // 保存位置
+      this.savePosition();
+    }
+  }
+
+  /**
+   * 触摸开始
+   */
+  handleTouchStart(e) {
+    if (e.touches.length !== 1) return;
+    
+    this.isDragging = true;
+    this.button.classList.add('dragging');
+    
+    const touch = e.touches[0];
+    const rect = this.button.getBoundingClientRect();
+    this.offsetX = touch.clientX - rect.left;
+    this.offsetY = touch.clientY - rect.top;
+    this.startX = touch.clientX;
+    this.startY = touch.clientY;
+    
+    e.preventDefault();
+  }
+
+  /**
+   * 触摸移动
+   */
+  handleTouchMove(e) {
+    if (!this.isDragging || e.touches.length !== 1) return;
+    
+    const touch = e.touches[0];
+    const x = touch.clientX - this.offsetX;
+    const y = touch.clientY - this.offsetY;
+    
+    this.updatePosition(x, y);
+    e.preventDefault();
+  }
+
+  /**
+   * 触摸结束
+   */
+  handleTouchEnd(e) {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    this.button.classList.remove('dragging');
+    
+    const touch = e.changedTouches[0];
+    const moveDistance = Math.sqrt(
+      Math.pow(touch.clientX - this.startX, 2) + 
+      Math.pow(touch.clientY - this.startY, 2)
+    );
+    
+    if (moveDistance < 5) {
+      this.handleClick();
+    } else {
+      this.savePosition();
+    }
+  }
+
+  /**
+   * 更新位置
+   */
+  updatePosition(x, y) {
+    if (!this.button) return;
+    
+    // 限制在窗口内
+    const maxX = window.innerWidth - this.button.offsetWidth;
+    const maxY = window.innerHeight - this.button.offsetHeight;
+    
+    x = Math.max(0, Math.min(x, maxX));
+    y = Math.max(0, Math.min(y, maxY));
+    
+    this.button.style.left = `${x}px`;
+    this.button.style.top = `${y}px`;
+    this.button.style.right = 'auto';
+    this.button.style.bottom = 'auto';
+  }
+
+  /**
+   * 处理点击
+   */
+  async handleClick() {
+    if (!this.button) return;
+    
+    // 添加保存动画
+    this.button.classList.add('saving');
+    
+    try {
+      // 发送保存消息到 background
+      const response = await chrome.runtime.sendMessage({
+        action: 'saveArticle',
+        url: window.location.href,
+        title: document.title
+      });
+      
+      if (response.success) {
+        // 成功提示
+        this.showToast('✅ 文章已保存', 'success');
+      } else {
+        throw new Error(response.error || '保存失败');
+      }
+    } catch (error) {
+      console.error('保存文章失败:', error);
+      this.showToast('❌ ' + error.message, 'error');
+    } finally {
+      this.button.classList.remove('saving');
+    }
+  }
+
+  /**
+   * 显示提示消息
+   */
+  showToast(message, type = 'info') {
+    // 移除现有的 toast
+    const existingToast = document.getElementById('digest-ai-toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+    
+    // 创建新的 toast
+    const toast = document.createElement('div');
+    toast.id = 'digest-ai-toast';
+    toast.textContent = message;
+    toast.className = `digest-ai-toast ${type}`;
+    
+    // 注入 toast 样式
+    if (!document.getElementById('digest-ai-toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'digest-ai-toast-styles';
+      style.textContent = `
+        .digest-ai-toast {
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.9);
+          color: white;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          z-index: 1000000;
+          animation: slideDown 0.3s ease-out;
+        }
+        
+        .digest-ai-toast.success {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .digest-ai-toast.error {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // 3秒后移除
+    setTimeout(() => {
+      toast.style.animation = 'slideDown 0.3s ease-out reverse';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  /**
+   * 保存位置到存储
+   */
+  async savePosition() {
+    if (!this.button) return;
+    
+    const position = {
+      left: this.button.style.left,
+      top: this.button.style.top
+    };
+    
+    await chrome.storage.local.set({ floatButtonPosition: position });
+  }
+
+  /**
+   * 从存储加载位置
+   */
+  async loadPosition() {
+    if (!this.button) return;
+    
+    const { floatButtonPosition } = await chrome.storage.local.get(['floatButtonPosition']);
+    
+    if (floatButtonPosition && floatButtonPosition.left && floatButtonPosition.top) {
+      this.button.style.left = floatButtonPosition.left;
+      this.button.style.top = floatButtonPosition.top;
+      this.button.style.right = 'auto';
+      this.button.style.bottom = 'auto';
+    }
+  }
+
+  /**
+   * 移除悬浮球
+   */
+  remove() {
+    if (this.button) {
+      this.button.remove();
+      this.button = null;
+    }
+  }
+
+  /**
+   * 更新悬浮球状态
+   */
+  async updateState() {
+    const settings = await chrome.storage.local.get(['enableFloatButton']);
+    const newEnabled = settings.enableFloatButton !== undefined ? settings.enableFloatButton : true;
+    
+    if (newEnabled !== this.enabled) {
+      this.enabled = newEnabled;
+      if (newEnabled) {
+        await this.init();
+      } else {
+        this.remove();
+      }
+    }
+  }
+}
+
+// 创建全局实例
+const floatButton = new FloatButton();
+
+// 页面加载完成后初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => floatButton.init());
+} else {
+  floatButton.init();
+}
+
+// 监听设置变化
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.enableFloatButton) {
+    floatButton.updateState();
+  }
+});
+
+// 导出供其他脚本使用
+if (typeof window !== 'undefined') {
+  window.digestAIFloatButton = floatButton;
+}
+
+
+/******/ })()
+;
+//# sourceMappingURL=floatButton.js.map
