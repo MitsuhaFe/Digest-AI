@@ -1256,7 +1256,7 @@ function injectFloatButtonStyles() {
       border-radius: 50%;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
       cursor: pointer;
-      z-index: 999999;
+      z-index: 2147483647;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1424,8 +1424,14 @@ async function loadButtonPosition(button) {
   const { floatButtonPosition } = await chrome.storage.local.get(['floatButtonPosition']);
   
   if (floatButtonPosition?.left && floatButtonPosition?.top) {
-    button.style.left = floatButtonPosition.left;
-    button.style.top = floatButtonPosition.top;
+    const leftPx = parseInt(floatButtonPosition.left, 10);
+    const topPx = parseInt(floatButtonPosition.top, 10);
+    const maxX = window.innerWidth - 56;
+    const maxY = window.innerHeight - 56;
+    const clampedLeft = Math.max(0, Math.min(isNaN(leftPx) ? 0 : leftPx, maxX));
+    const clampedTop = Math.max(0, Math.min(isNaN(topPx) ? 0 : topPx, maxY));
+    button.style.left = `${clampedLeft}px`;
+    button.style.top = `${clampedTop}px`;
     button.style.right = 'auto';
     button.style.bottom = 'auto';
   }

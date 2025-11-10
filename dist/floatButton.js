@@ -76,7 +76,7 @@ class FloatButton {
         border-radius: 50%;
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         cursor: pointer;
-        z-index: 999999;
+        z-index: 2147483647;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -414,8 +414,16 @@ class FloatButton {
     const { floatButtonPosition } = await chrome.storage.local.get(['floatButtonPosition']);
     
     if (floatButtonPosition && floatButtonPosition.left && floatButtonPosition.top) {
-      this.button.style.left = floatButtonPosition.left;
-      this.button.style.top = floatButtonPosition.top;
+      // 读取并限制在当前可视区域内，避免被保存到屏幕外导致“看不见”
+      const leftPx = parseInt(floatButtonPosition.left, 10);
+      const topPx = parseInt(floatButtonPosition.top, 10);
+      const maxX = window.innerWidth - 56;
+      const maxY = window.innerHeight - 56;
+      const clampedLeft = Math.max(0, Math.min(isNaN(leftPx) ? 0 : leftPx, maxX));
+      const clampedTop = Math.max(0, Math.min(isNaN(topPx) ? 0 : topPx, maxY));
+
+      this.button.style.left = `${clampedLeft}px`;
+      this.button.style.top = `${clampedTop}px`;
       this.button.style.right = 'auto';
       this.button.style.bottom = 'auto';
     }
