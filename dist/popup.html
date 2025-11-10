@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digest AI</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- 头部 -->
+    <header class="popup-header">
+      <h1 class="popup-title">Digest AI</h1>
+      <button id="settingsBtn" class="icon-btn" title="设置">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 6a2 2 0 100-4 2 2 0 000 4zM10 12a2 2 0 100-4 2 2 0 000 4zM10 18a2 2 0 100-4 2 2 0 000 4z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- 状态区域 -->
+    <div id="statusArea" class="status-area">
+      <div id="idleState" class="state">
+        <div class="icon-large">📚</div>
+        <p class="status-text">点击下方按钮保存当前文章</p>
+        
+        <!-- 保存选项 -->
+        <div class="save-options">
+          <label class="option-label">
+            <input type="checkbox" id="saveOriginalCheckbox" checked />
+            <span>保存文章原文</span>
+          </label>
+          <label class="option-label">
+            <input type="checkbox" id="saveImagesCheckbox" checked />
+            <span>保存文章图片</span>
+          </label>
+        </div>
+        
+        <button id="saveBtn" class="btn btn-primary">保存文章</button>
+      </div>
+
+      <div id="processingState" class="state hidden">
+        <div class="spinner"></div>
+        <p class="status-text">正在抓取并分析...</p>
+        <p class="status-detail" id="processingDetail">提取文章内容中...</p>
+      </div>
+
+      <div id="successState" class="state hidden">
+        <div class="icon-large">✅</div>
+        <p class="status-text">保存成功！</p>
+        <div id="articleInfo" class="article-info">
+          <h3 id="articleTitle"></h3>
+          <p id="articleUrl"></p>
+        </div>
+        
+        <!-- AI 推荐标签 -->
+        <div id="suggestedTagsArea" class="suggested-tags-area hidden">
+          <p class="suggested-tags-label">💡 AI 推荐标签：</p>
+          <div id="suggestedTagsList" class="suggested-tags-list"></div>
+        </div>
+        
+        <!-- 标签输入 -->
+        <div class="tag-input-area">
+          <label class="tag-input-label">已添加标签：</label>
+          <div id="tagList" class="tag-list"></div>
+          <input type="text" id="tagInput" placeholder="添加自定义标签（按 Enter 键）" />
+        </div>
+
+        <div class="action-buttons">
+          <button id="viewLibraryBtn" class="btn btn-primary">在阅读库中查看</button>
+          <button id="closeBtn" class="btn btn-secondary">关闭</button>
+        </div>
+      </div>
+
+      <div id="errorState" class="state hidden">
+        <div class="icon-large">⚠️</div>
+        <p class="status-text">出错了</p>
+        <p class="error-message" id="errorMessage"></p>
+        <button id="retryBtn" class="btn btn-primary">重试</button>
+      </div>
+
+      <div id="noConfigState" class="state hidden">
+        <div class="icon-large">⚙️</div>
+        <p class="status-text">需要配置</p>
+        <p class="status-detail">请先配置 AI 模型和 API Key</p>
+        <button id="goToSettingsBtn" class="btn btn-primary">前往设置</button>
+      </div>
+    </div>
+
+    <!-- 底部快捷链接 -->
+    <footer class="popup-footer">
+      <a href="#" id="viewAllLink" class="footer-link">查看全部文章</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
