@@ -313,6 +313,41 @@
         <div id="statusMessage" class="status-message hidden"></div>
       </section>
       
+      <!-- 云同步 -->
+      <section id="cloud-section" class="settings-section">
+        <h2 class="section-title">云同步（Supabase）</h2>
+        <div class="info-box">
+          <p>使用邮箱登录后，可在本地与云端之间上传/下载数据。</p>
+          <p>服务地址：<strong id="sbUrlText"></strong></p>
+        </div>
+        <div class="setting-group">
+          <h3 class="subsection-title">🔐 账户</h3>
+          <div class="setting-item">
+            <label class="setting-label">邮箱</label>
+            <input type="email" id="sbEmail" class="input-field" placeholder="you@example.com" autocomplete="off" />
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">密码</label>
+            <input type="password" id="sbPassword" class="input-field" placeholder="至少 6 位" autocomplete="off" />
+          </div>
+          <div class="button-group">
+            <button id="sbSignupBtn" class="btn btn-secondary">注册</button>
+            <button id="sbLoginBtn" class="btn btn-primary">登录</button>
+            <button id="sbLogoutBtn" class="btn">退出登录</button>
+          </div>
+          <div id="sbAuthStatus" class="setting-hint" style="margin-top:8px;color:#666;"></div>
+        </div>
+        <div class="setting-group">
+          <h3 class="subsection-title">☁️ 数据同步</h3>
+          <div class="button-group">
+            <button id="sbUploadBtn" class="btn btn-primary">上传本地数据到云端</button>
+            <button id="sbDownloadMergeBtn" class="btn btn-secondary">从云端下载并合并</button>
+            <button id="sbDownloadOverwriteBtn" class="btn">从云端下载并覆盖本地</button>
+          </div>
+          <p class="setting-hint">合并：以文章 id 为键合并；覆盖：用云端数据替换本地。</p>
+          <div id="sbSyncStatus" class="setting-hint" style="margin-top:8px;color:#666;"></div>
+        </div>
+      </section>
       <!-- 关于 -->
       <section id="about-section" class="settings-section">
         <h2 class="section-title">关于 Digest AI</h2>
@@ -353,14 +388,7 @@
   
   <script src="scripts/theme.js"></script>
   <script src="scripts/fontSize.js"></script>
-  <script>
-    // 页面加载时应用保存的主题和字体大小
-    (async function() {
-      await loadSavedTheme();
-      await loadSavedFontSize();
-      watchSystemTheme();
-    })();
-  </script>
+  <script src="scripts/supabase.js"></script>
   <script src="settings.js"></script>
 </body>
 </html>

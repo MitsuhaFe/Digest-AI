@@ -369,6 +369,31 @@
 
 ---
 
+**日期:** 2025-11-10
+
+**[开发者] Prompt:**
+> 使用 Supabase 的 MCP，用于注册登录验证以及数据的储存；用户可在插件中选择上传或下载云端数据，上传本地文章到 Supabase，下载将云端文章同步回本地。  
+> 项目 URL: https://rikwhcpglvmxzdyovzse.supabase.co
+
+**[AI] 变更摘要:**
+* 在 `scripts/supabase.js` 实现无依赖的 Supabase REST 客户端（兼容 MV3，无需外部库）：
+  * `signup/login/logout/getCurrentUser` 基于 `auth/v1` 实现邮箱密码注册与登录
+  * `uploadArticles/downloadArticles` 基于 `rest/v1` 实现文章的批量上/下载（合并或覆盖）
+  * 统一存储 Supabase 会话到 `chrome.storage.local`
+* 在 `settings.html` 新增“云同步”页面与导航项：
+  * 邮箱/密码注册、登录、退出按钮
+  * “上传本地数据到云端”、“从云端下载并合并/覆盖”按钮与状态展示
+* 在 `settings.js` 集成云同步事件与 UI 状态刷新
+* 在 `webpack.config.js` 中复制 `scripts/supabase.js` 到构建产物
+* 在 `使用指南.md` 新增“☁️ 云同步（Supabase）”章节：
+  * 详细说明开启、上传、下载流程与注意事项
+  * 提供一次性初始化 SQL（建表、RLS 策略）
+* 数据表设计（需在 Supabase SQL Editor 执行一次）：
+  * 表 `public.articles`（主键 id + RLS: `user_id = auth.uid()`）
+  * 开启 RLS 与“仅用户可管理自身数据”的策略
+
+---
+
 **日期:** 2024-10-24
 
 **[开发者] Prompt:**

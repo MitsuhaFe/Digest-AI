@@ -13,6 +13,19 @@ const elements = {
   themeSelect: document.getElementById('themeSelect'),
   fontSizeSelect: document.getElementById('fontSizeSelect'),
   
+  // 云同步（Supabase）
+  sbUrlText: document.getElementById('sbUrlText'),
+  sbEmail: document.getElementById('sbEmail'),
+  sbPassword: document.getElementById('sbPassword'),
+  sbSignupBtn: document.getElementById('sbSignupBtn'),
+  sbLoginBtn: document.getElementById('sbLoginBtn'),
+  sbLogoutBtn: document.getElementById('sbLogoutBtn'),
+  sbUploadBtn: document.getElementById('sbUploadBtn'),
+  sbDownloadMergeBtn: document.getElementById('sbDownloadMergeBtn'),
+  sbDownloadOverwriteBtn: document.getElementById('sbDownloadOverwriteBtn'),
+  sbAuthStatus: document.getElementById('sbAuthStatus'),
+  sbSyncStatus: document.getElementById('sbSyncStatus'),
+  
   // AI 配置
   aiModelSelect: document.getElementById('aiModelSelect'),
   
@@ -48,6 +61,10 @@ const elements = {
   saveSettingsBtn: document.getElementById('saveSettingsBtn'),
   testConnectionBtn: document.getElementById('testConnectionBtn'),
   backToDashboard: document.getElementById('backToDashboard'),
+  // 底部链接
+  viewDocs: document.getElementById('viewDocs'),
+  reportIssue: document.getElementById('reportIssue'),
+  visitGithub: document.getElementById('visitGithub'),
   
   // 状态消息
   statusMessage: document.getElementById('statusMessage')
@@ -73,6 +90,24 @@ function switchSection(sectionId) {
     }
   });
 }
+
+// 初始化侧边栏导航，增加云同步菜单项（若不存在）
+(function ensureCloudNav() {
+  const sidebarNav = document.querySelector('.nav-menu');
+  if (sidebarNav && !sidebarNav.querySelector('[data-section="cloud"]')) {
+    const link = document.createElement('a');
+    link.href = '#cloud';
+    link.className = 'nav-item';
+    link.dataset.section = 'cloud';
+    link.innerHTML = '<span class="icon">☁️</span><span>云同步</span>';
+    sidebarNav.insertBefore(link, sidebarNav.querySelector('[data-section="about"]'));
+    // 绑定事件
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchSection('cloud');
+    });
+  }
+})();
 
 /**
  * 根据选择的模型启用/禁用测试连接按钮
@@ -232,6 +267,106 @@ async function loadSettings() {
     // 这里不需要重复应用，避免冲突
   } catch (error) {
     console.error('加载设置失败:', error);
+  }
+}
+
+/**
+ * 云同步 - UI 状态
+ */
+async function refreshSupabaseUI() {
+  try {
+    if (elements.sbUrlText && window.SupabaseSync?.constants?.url) {
+      elements.sbUrlText.textContent = window.SupabaseSync.constants.url;
+    }
+    const user = await window.SupabaseSync.getCurrentUser().catch(() => null);
+    if (user && user.email) {
+      elements.sbAuthStatus.textContent = `已登录：${user.email}`;
+    } else {
+      elements.sbAuthStatus.textContent = '未登录';
+    }
+  } catch (e) {
+    elements.sbAuthStatus.textContent = '状态获取失败';
+  }
+}
+
+/**
+ * 云同步 - 事件处理
+ */
+async function sbSignup() {
+  try {
+    const email = elements.sbEmail.value.trim();
+    const password = elements.sbPassword.value;
+    if (!email || !password) {
+      showStatus('请输入邮箱和密码', 'error');
+      return;
+    }
+    await window.SupabaseSync.signup(email, password);
+    showStatus('注册成功，如需邮件验证请前往邮箱确认', 'success');
+    await refreshSupabaseUI();
+  } catch (e) {
+    showStatus(`注册失败：${e.message}`, 'error');
+  }
+}
+
+async function sbLogin() {
+  try {
+    const email = elements.sbEmail.value.trim();
+    const password = elements.sbPassword.value;
+    if (!email || !password) {
+      showStatus('请输入邮箱和密码', 'error');
+      return;
+    }
+    await window.SupabaseSync.login(email, password);
+    showStatus('登录成功', 'success');
+    await refreshSupabaseUI();
+  } catch (e) {
+    showStatus(`登录失败：${e.message}`, 'error');
+  }
+}
+
+async function sbLogout() {
+  try {
+    await window.SupabaseSync.logout();
+    showStatus('已退出登录', 'success');
+    await refreshSupabaseUI();
+  } catch (e) {
+    showStatus(`退出失败：${e.message}`, 'error');
+  }
+}
+
+async function sbUpload() {
+  try {
+    elements.sbSyncStatus.textContent = '正在上传...';
+    const result = await window.SupabaseSync.uploadArticles();
+    elements.sbSyncStatus.textContent = `上传完成：${result.inserted} 篇`;
+    showStatus('上传完成', 'success');
+  } catch (e) {
+    elements.sbSyncStatus.textContent = `上传失败：${e.message}`;
+    showStatus(`上传失败：${e.message}`, 'error');
+  }
+}
+
+async function sbDownloadMerge() {
+  try {
+    elements.sbSyncStatus.textContent = '正在下载并合并...';
+    const result = await window.SupabaseSync.downloadArticles({ overwrite: false });
+    elements.sbSyncStatus.textContent = `下载完成：${result.downloaded} 篇（已合并）`;
+    showStatus('下载完成（已合并）', 'success');
+  } catch (e) {
+    elements.sbSyncStatus.textContent = `下载失败：${e.message}`;
+    showStatus(`下载失败：${e.message}`, 'error');
+  }
+}
+
+async function sbDownloadOverwrite() {
+  try {
+    elements.sbSyncStatus.textContent = '正在下载并覆盖本地...';
+    const result = await window.SupabaseSync.downloadArticles({ overwrite: true });
+    elements.sbSyncStatus.textContent = `下载完成：${result.downloaded} 篇（已覆盖本地）`;
+    showStatus('下载完成（已覆盖本地）', 'success');
+  } catch (e) {
+    elements.sbSyncStatus.textContent = `下载失败：${e.message}`;
+    showStatus(`下载失败：${e.message}`, 'error');
   }
 }
 
@@ -429,6 +564,32 @@ elements.testConnectionBtn.addEventListener('click', testConnection);
 elements.backToDashboard.addEventListener('click', () => {
   chrome.tabs.create({ url: 'dashboard.html' });
 });
+// 外部链接
+if (elements.viewDocs) {
+  elements.viewDocs.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: 'https://github.com/MitsuhaFe/Digest-AI#readme' });
+  });
+}
+if (elements.reportIssue) {
+  elements.reportIssue.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: 'https://github.com/MitsuhaFe/Digest-AI/issues/new/choose' });
+  });
+}
+if (elements.visitGithub) {
+  elements.visitGithub.addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.tabs.create({ url: 'https://github.com/MitsuhaFe/Digest-AI' });
+  });
+}
+// 云同步按钮
+if (elements.sbSignupBtn) elements.sbSignupBtn.addEventListener('click', sbSignup);
+if (elements.sbLoginBtn) elements.sbLoginBtn.addEventListener('click', sbLogin);
+if (elements.sbLogoutBtn) elements.sbLogoutBtn.addEventListener('click', sbLogout);
+if (elements.sbUploadBtn) elements.sbUploadBtn.addEventListener('click', sbUpload);
+if (elements.sbDownloadMergeBtn) elements.sbDownloadMergeBtn.addEventListener('click', sbDownloadMerge);
+if (elements.sbDownloadOverwriteBtn) elements.sbDownloadOverwriteBtn.addEventListener('click', sbDownloadOverwrite);
 
 // API Key 显示/隐藏按钮（多个）
 elements.toggleApiKeyButtons.forEach(button => {
@@ -481,6 +642,17 @@ elements.resetPromptBtn.addEventListener('click', () => {
 
 // 初始化
 (function init() {
+  // 应用已保存的主题/字体，并监听系统主题（避免 settings.html 内联脚本触发 CSP）
+  if (typeof loadSavedTheme === 'function') {
+    loadSavedTheme().catch(() => {});
+  }
+  if (typeof loadSavedFontSize === 'function') {
+    loadSavedFontSize().catch(() => {});
+  }
+  if (typeof watchSystemTheme === 'function') {
+    try { watchSystemTheme(); } catch (e) {}
+  }
   loadSettings();
+  refreshSupabaseUI();
 })();
 

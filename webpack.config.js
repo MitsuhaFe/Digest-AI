@@ -36,6 +36,7 @@ module.exports = {
         { from: 'settings.html', to: 'settings.html' },
         { from: 'styles', to: 'styles' },
         { from: 'icons', to: 'icons' },
+        { from: 'scripts/supabase.js', to: 'scripts/supabase.js' },
         { from: 'scripts/theme.js', to: 'scripts/theme.js' },
         { from: 'scripts/fontSize.js', to: 'scripts/fontSize.js' },
         { from: 'scripts/notification.js', to: 'scripts/notification.js' },
