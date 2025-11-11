@@ -134,7 +134,7 @@ if (window.location.hostname.includes('bilibili.com') && window.location.pathnam
     async getTopComments(aid, bvid) {
       try {
         const oid = aid || bvid;
-        const commentUrl = `${this.apiBase}/x/v2/reply?type=1&oid=${oid}&sort=2&ps=20`;
+        const commentUrl = `${this.apiBase}/x/v2/reply?type=1&oid=${oid}&sort=2&ps=30`;
         const response = await fetch(commentUrl, {
           credentials: 'include',
           headers: { 'Referer': 'https://www.bilibili.com' }
@@ -143,7 +143,7 @@ if (window.location.hostname.includes('bilibili.com') && window.location.pathnam
         const data = await response.json();
         if (data.code !== 0 || !data.data?.replies?.length) return null;
         const comments = [];
-        const replies = data.data.replies.slice(0, 10);
+        const replies = data.data.replies.slice(0, 25);
         replies.forEach(reply => {
           if (reply.content?.message && reply.content.message.length > 5) {
             const msg = reply.content.message.trim();
